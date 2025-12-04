@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS jobs (
   status TEXT NOT NULL CHECK(status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED')),
   input_file TEXT NOT NULL,
   output_file TEXT,
+  logs TEXT DEFAULT '',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

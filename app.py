@@ -1,7 +1,9 @@
 import os
 import sqlite3
 import uuid
+import threading
 from flask import Flask, request, render_template, redirect, url_for, send_from_directory
+from worker import process_jobs
 
 # --- Configuration ---
 UPLOAD_FOLDER = 'uploads'
@@ -12,6 +14,9 @@ ALLOWED_EXTENSIONS = {'xlsx'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+
+# Worker state tracking
+worker_running = False
 
 # --- Database Helpers ---
 def get_db():
@@ -27,6 +32,11 @@ def init_db():
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
+        # Add logs column if it doesn't exist
+        try:
+            db.execute('ALTER TABLE jobs ADD COLUMN logs TEXT DEFAULT ""')
+        except sqlite3.OperationalError:
+            pass  # Column already exists
         db.commit()
 
 @app.teardown_appcontext
@@ -63,6 +73,12 @@ def upload_page():
                        (job_id, 'PENDING', filepath))
             db.commit()
             
+            # Start worker in background thread if not already running
+            global worker_running
+            if not worker_running:
+                worker_running = True
+                threading.Thread(target=process_jobs, daemon=True).start()
+            
             return redirect(url_for('status_page', job_id=job_id))
             
     return render_template('index.html')
@@ -75,7 +91,7 @@ def status_page(job_id):
     if not job:
         return "Job not found", 404
         
-    return render_template('status.html', job=job)
+    return render_template('index.html', job=job)
 
 @app.route('/download/<job_id>')
 def download_zip(job_id):
