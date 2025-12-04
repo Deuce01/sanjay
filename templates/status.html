@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Job Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="refresh" content="10">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg text-center">
+        <h1 class="text-3xl font-bold mb-4">
+            {% if job.status == 'COMPLETED' %} Job Complete!
+            {% elif job.status == 'FAILED' %} Job Failed
+            {% else %} Processing... {% endif %}
+        </h1>
+        
+        <p class="text-lg text-gray-600 mb-6">Status: <span class="font-bold">{{ job.status }}</span></p>
+
+        {% if job.status == 'COMPLETED' %}
+            <a href="{{ url_for('download_zip', job_id=job.id) }}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700">Download ZIP</a>
+        {% elif job.status == 'FAILED' %}
+            <a href="/" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700">Try Again</a>
+        {% else %}
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="text-sm text-gray-400 mt-4">Page refreshes automatically</p>
+        {% endif %}
+    </div>
+</body>
+</html>
