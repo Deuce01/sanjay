@@ -11,11 +11,13 @@ TEMPLATE_BG = os.path.join(ASSET_DIR, "template-background.jpg")
 FONT_BOLD_FILE = os.path.join(ASSET_DIR, "font_bold.ttf")
 FONT_REGULAR_FILE = os.path.join(ASSET_DIR, "font_regular.ttf")
 
-# Settings
+# Settings for the SQUARE Floral Template
 SCENE_DURATION = 4
 VIDEO_WIDTH = 1024
 VIDEO_HEIGHT = 1024
 CX = VIDEO_WIDTH // 2
+
+# Colors extracted from the template (Dark Brown / Muted Pink)
 TEXT_COLOR_DARK = "#5D4037"
 TEXT_COLOR_LIGHT = "#7A5549"
 
@@ -25,17 +27,20 @@ def create_scene_image(profile, scene_number, temp_dir):
 
     # Fonts
     try:
-        font_h1 = ImageFont.truetype(FONT_BOLD_FILE, 65)
-        font_h2 = ImageFont.truetype(FONT_BOLD_FILE, 40)
-        font_p = ImageFont.truetype(FONT_REGULAR_FILE, 35)
-        font_link = ImageFont.truetype(FONT_REGULAR_FILE, 25) 
+        # Slightly smaller fonts to fit the square layout better
+        font_h1 = ImageFont.truetype(FONT_BOLD_FILE, 55)  # Name
+        font_h2 = ImageFont.truetype(FONT_BOLD_FILE, 35)  # Labels (Age, Religion...)
+        font_p = ImageFont.truetype(FONT_REGULAR_FILE, 30) # Values
+        font_link = ImageFont.truetype(FONT_REGULAR_FILE, 22) # URL
     except IOError:
         print("Error: Fonts not found.")
         return None
 
-    # Profile Picture
-    pfp_y = 220
+    # --- 1. Profile Picture Logic ---
+    # We place this higher so it "sits" on the top edge of the box
+    pfp_y = 160 
     pfp_size = 300
+    
     try:
         pic_path = os.path.join(temp_dir, "profile_pic.jpg")
         
@@ -54,65 +59,74 @@ def create_scene_image(profile, scene_number, temp_dir):
     except Exception as e:
         print(f"PFP Error: {e}")
 
-    # Layout Coordinates
-    # Gap increased to 80px as requested
-    y_name = pfp_y + pfp_size + 80 
-    # URL moved below name as requested
-    y_url = y_name + 60 
-    y_col_start = y_url + 70 
+    # --- 2. Layout Coordinates (Tuned for 1024x1024) ---
+    
+    # Name appears just below the photo with more spacing
+    y_name = pfp_y + pfp_size + 50  # y = 510
+    
+    # URL appears below the name
+    y_url = y_name + 60             # y = 540
+    
+    # Data grid starts below the URL
+    y_col_start = y_url + 60        # y = 600
 
     # Data Extraction
     url_text = profile.get("additional_data", {}).get("profile_url", "")
     name = profile["profile_name"]
     name_alt = f"{profile.get('additional_data', {}).get('star_sign', '')} / {name}"
     
-    # Common Elements (Name & URL)
+    # Draw Name & URL (Common to all scenes)
     display_name = name if scene_number == 1 else name_alt
     draw.text((CX, y_name), display_name, font=font_h1, fill=TEXT_COLOR_DARK, anchor="ms")
     draw.text((CX, y_url), url_text, font=font_link, fill=TEXT_COLOR_LIGHT, anchor="ms")
 
-    # Scene Specifics
-    col1 = 320
-    col2 = 704
+    # Column Positions (Centered in the layout)
+    col1 = 300
+    col2 = 724
+    
+    # --- Scene Specific Content ---
     
     if scene_number == 1:
+        # Row 1
         draw.text((col1, y_col_start), "AGE", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((col1, y_col_start + 45), f"{profile.get('age', 'N/A')} Years", font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((col1, y_col_start + 40), f"{profile.get('age', 'N/A')} Years", font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
         
         draw.text((col2, y_col_start), "RELIGION", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((col2, y_col_start + 45), profile.get("religion", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((col2, y_col_start + 40), profile.get("religion", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
         
-        y_row2 = y_col_start + 120
+        # Row 2
+        y_row2 = y_col_start + 100
         draw.text((col1, y_row2), "MARITAL STATUS", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((col1, y_row2 + 45), profile.get("marital_status", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((col1, y_row2 + 40), profile.get("marital_status", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
         
         draw.text((col2, y_row2), "MOTHER TONGUE", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((col2, y_row2 + 45), profile.get("mother_tongue", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((col2, y_row2 + 40), profile.get("mother_tongue", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
 
     elif scene_number == 2:
         draw.text((CX, y_col_start), "EDUCATION", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((CX, y_col_start + 45), profile.get("education", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((CX, y_col_start + 40), profile.get("education", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
         
-        y_row2 = y_col_start + 120
+        y_row2 = y_col_start + 100
         draw.text((CX, y_row2), "OCCUPATION", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        draw.text((CX, y_row2 + 45), profile.get("occupation", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((CX, y_row2 + 40), profile.get("occupation", "N/A"), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
 
     elif scene_number == 3:
         draw.text((CX, y_col_start), "Lifestyle", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
-        y = y_col_start + 60
+        y = y_col_start + 50
         draw.text((CX, y), profile.get("additional_data", {}).get("food_habit", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
-        draw.text((CX, y + 50), profile.get("additional_data", {}).get("smoking_habit", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
-        draw.text((CX, y + 100), profile.get("additional_data", {}).get("drinking_habit", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((CX, y + 40), profile.get("additional_data", {}).get("smoking_habit", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+        draw.text((CX, y + 80), profile.get("additional_data", {}).get("drinking_habit", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
 
     elif scene_number == 4:
         draw.text((CX, y_col_start), "About me", font=font_h2, fill=TEXT_COLOR_DARK, anchor="ms")
         about = profile.get("about", "")
-        lines = [about[i:i+45] for i in range(0, len(about), 45)]
-        y = y_col_start + 60
+        # Wider text wrap for square layout
+        lines = [about[i:i+50] for i in range(0, len(about), 50)]
+        y = y_col_start + 50
         for line in lines:
             draw.text((CX, y), line, font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
-            y += 45
-        draw.text((CX, y + 30), profile.get("country", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
+            y += 40
+        draw.text((CX, y + 20), profile.get("country", ""), font=font_p, fill=TEXT_COLOR_LIGHT, anchor="ms")
 
     outfile = os.path.join(temp_dir, f"scene-{scene_number}.png")
     img.save(outfile)
@@ -135,15 +149,13 @@ def generate_video_from_profile(profile_json, output_filename):
             print("Failed to download music, using silence.")
 
     if not has_music:
-        # Create silent track
-        try:
-            subprocess.run([
-                'ffmpeg', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=mono',
-                '-t', str(SCENE_DURATION * 4), '-q:a', '9', '-acodec', 'mp3',
-                '-y', music_file
-            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except:
-            return None # Critical failure if ffmpeg fails
+        # Use existing audio from assets
+        default_audio = os.path.join(ASSET_DIR, "VN20251008_150305.mp3")
+        if os.path.exists(default_audio):
+            shutil.copy(default_audio, music_file)
+            has_music = True
+        else:
+            return None # No audio available
 
     try:
         scenes = []
