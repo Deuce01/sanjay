@@ -1,0 +1,4 @@
+PassengerEnabled On
+PassengerAppRoot /home/YOUR_USERNAME/yourdomain.com
+PassengerBaseURI /
+PassengerPython /home/YOUR_USERNAME/yourdomain.com/venv/bin/python
